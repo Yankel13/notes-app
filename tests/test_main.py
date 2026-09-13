@@ -1,7 +1,9 @@
 import os
+
 os.environ["POSTGRES_HOST"] = "localhost"
 
 from fastapi.testclient import TestClient
+
 from app.main import app
 
 client = TestClient(app)

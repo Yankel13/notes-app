@@ -1,13 +1,13 @@
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
+from prometheus_fastapi_instrumentator import Instrumentator
 from sqlalchemy import text
 from sqlalchemy.orm import Session
-from prometheus_fastapi_instrumentator import Instrumentator
 
-from app import crud, schemas, metrics
-from app.cache import get_cached_note, set_cached_note, invalidate_note
+from app import crud, metrics, schemas
+from app.cache import get_cached_note, invalidate_note, set_cached_note
 from app.config import settings
 from app.database import Base, engine, get_db
 
@@ -37,6 +37,7 @@ def ready(db: Session = Depends(get_db)):
     try:
         db.execute(text("SELECT 1"))
         from app.cache import redis_client
+
         redis_client.ping()
         return {"status": "ready"}
     except Exception as e:
@@ -72,7 +73,9 @@ def get_note(note_id: int, db: Session = Depends(get_db)):
 
 
 @app.patch("/notes/{note_id}", response_model=schemas.NoteRead)
-def update_note(note_id: int, payload: schemas.NoteUpdate, db: Session = Depends(get_db)):
+def update_note(
+    note_id: int, payload: schemas.NoteUpdate, db: Session = Depends(get_db)
+):
     note = crud.update_note(db, note_id, payload)
     if not note:
         raise HTTPException(status_code=404, detail="Note not found")
@@ -86,4 +89,3 @@ def delete_note(note_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Note not found")
     invalidate_note(note_id)
     metrics.notes_deleted_total.inc()
-    return None
