@@ -1,0 +1,56 @@
+# Общие настройки
+namespace: notes-app
+
+# Настройки приложения
+app:
+  name: notes-app
+  replicas: 2
+  image:
+    repository: ghcr.io/yankel13/notes-app
+    tag: latest
+    pullPolicy: Always
+  port: 8000
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# PostgreSQL
+postgres:
+  image: postgres:16-alpine
+  port: 5432
+  storage: 1Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# Redis
+redis:
+  image: redis:7-alpine
+  port: 6379
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+# Секреты (в реальном проекте — через Vault или Sealed Secrets)
+secrets:
+  postgresUser: notes
+  postgresPassword: notes_secret
+  postgresDb: notes_db
+  secretKey: change-me-in-prod
+
+# Настройки приложения (не секретные)
+config:
+  appEnv: production
+  logLevel: info

@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "notes-app.labels" . | nindent 4 }}
+    app: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - name: redis
+          image: {{ .Values.redis.image }}
+          ports:
+            - containerPort: {{ .Values.redis.port }}
+          resources:
+            {{- toYaml .Values.redis.resources | nindent 12 }}
+          readinessProbe:
+            tcpSocket:
+              port: {{ .Values.redis.port }}
+            initialDelaySeconds: 5
+            periodSeconds: 10

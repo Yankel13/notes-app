@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: notes-config
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "notes-app.labels" . | nindent 4 }}
+data:
+  POSTGRES_HOST: postgres
+  POSTGRES_PORT: {{ .Values.postgres.port | quote }}
+  REDIS_HOST: redis
+  REDIS_PORT: {{ .Values.redis.port | quote }}
+  REDIS_DB: "0"
+  APP_NAME: {{ .Values.app.name | quote }}
+  APP_ENV: {{ .Values.config.appEnv | quote }}
+  APP_PORT: {{ .Values.app.port | quote }}
+  LOG_LEVEL: {{ .Values.config.logLevel | quote }}
